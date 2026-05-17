@@ -12,7 +12,6 @@ on:
       - CodeQL
       - Copilot cloud agent
       - Copilot code review
-      - Copilot coding agent
       - OpenAI Codex
       - Recompile Agentic Workflows
       - Renovate
