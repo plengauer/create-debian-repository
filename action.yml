@@ -76,7 +76,7 @@ runs:
         Suite: stable
         Codename: stable
         Version: 1.0
-        Architectures: all
+        Architectures: $(ls -d main/binary-* 2>/dev/null | sed 's|main/binary-||' | tr '\n' ' ' | sed 's/ $//')
         Components: main
         Description: A software repository hosting packages from github
         Date: $(date -Ru)
