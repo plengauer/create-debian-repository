@@ -9,7 +9,7 @@ on:
 jobs:
 
   release:
-    depends: test-repository
+    needs: test
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -34,8 +34,7 @@ jobs:
           draft: false
           prerelease: false
 
-  test-repository:
-    needs: release
+  test:
     runs-on: ubuntu-latest
     permissions:
       contents: read
