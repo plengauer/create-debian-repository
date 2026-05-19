@@ -32,3 +32,41 @@ jobs:
           release_name: Release v${{ steps.version.outputs.version }}
           draft: false
           prerelease: false
+
+  test-repository:
+    needs: release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: ./
+        with:
+          source: plengauer/Utilities
+          directory: ${{ runner.temp }}/utilities-repository
+      - shell: bash
+        run: |
+          set -euo pipefail
+          repository_directory="${RUNNER_TEMP}/utilities-repository"
+          port=18080
+          python3 -m http.server "${port}" --directory "${repository_directory}" > "${RUNNER_TEMP}/http-server.log" 2>&1 &
+          server_pid="$!"
+          trap 'kill "${server_pid}"' EXIT
+          for _ in $(seq 1 30); do
+            if curl -fsS "http://localhost:${port}/dists/stable/Release" > /dev/null; then
+              break
+            fi
+            sleep 1
+          done
+          curl -fsS "http://localhost:${port}/dists/stable/Release" > /dev/null
+          echo "deb [trusted=yes] http://localhost:${port} stable main" | sudo tee /etc/apt/sources.list.d/create-package-repository-test.list > /dev/null
+          sudo apt-get update
+          mapfile -t package_index_files < <(find /var/lib/apt/lists -maxdepth 1 -type f -name "localhost:${port}_dists_stable_main_binary-*_Packages")
+          if [ "${#package_index_files[@]}" -eq 0 ]; then
+            echo "No package index files were created by apt." >&2
+            exit 1
+          fi
+          packages="$(awk '/^Package: / { print $2 }' "${package_index_files[@]}" | sort -u)"
+          if [ -z "${packages}" ]; then
+            echo "No packages listed by apt from the local repository." >&2
+            exit 1
+          fi
+          printf 'Packages provided by local repository:\n%s\n' "${packages}"
