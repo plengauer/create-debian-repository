@@ -46,7 +46,7 @@ runs:
       working-directory: ${{ inputs.directory }}/dists/stable/main
       run: |
         ls | cut -d - -f 2- | while read -r arch; do
-          sed -i -E 's/([0-9]+)_'"$arch"'\.deb/\1/g' binary-"$arch"/Packages 
+          sed -i -E '/^Filename: / s/\.deb_[a-z0-9-]+\.deb$/.deb/g' binary-"$arch"/Packages
         done
     - shell: bash
       working-directory: ${{ inputs.directory }}/dists/stable/main
