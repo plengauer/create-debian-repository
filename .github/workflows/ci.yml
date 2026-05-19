@@ -9,6 +9,7 @@ on:
 jobs:
 
   release:
+    depends: test-repository
     runs-on: ubuntu-latest
     permissions:
       contents: write
