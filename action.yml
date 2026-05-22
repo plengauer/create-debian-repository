@@ -32,7 +32,7 @@ runs:
       run: |
         { echo all; dpkg-architecture -L | grep -v -- -; } | while read -r arch; do
           mkdir -p dists/stable/main/binary-"$arch"
-          [ ${{ inputs.mode }} = append ] || rm -rf dists/stable/main/binary-"$arch"/Packages
+          # [ ${{ inputs.mode }} = append ] || rm -rf dists/stable/main/binary-"$arch"/Packages
           dpkg-scanpackages --multiversion --arch "$arch" pool/main >> dists/stable/main/binary-"$arch"/Packages
           if [ "$(wc -c < dists/stable/main/binary-"$arch"/Packages)" = 0 ]; then rm -rf dists/stable/main/binary-"$arch"; fi
         done
@@ -40,13 +40,13 @@ runs:
       working-directory: ${{ inputs.directory }}/pool/main
       run: |
         ls | while read -r file; do
-          mv "$file" "${file%%_*}.deb"
+          mv "$file" "${file%%_*.deb}"
         done
     - shell: bash
       working-directory: ${{ inputs.directory }}/dists/stable/main
       run: |
         ls | cut -d - -f 2- | while read -r arch; do
-          sed -i -E '/^Filename: / s/\.deb_[a-z0-9-]+\.deb$/.deb/g' binary-"$arch"/Packages
+          sed -i -E 's/^Filename: (.*)_.*\.deb$/Filename: \1/g' binary-"$arch"/Packages
         done
     - shell: bash
       working-directory: ${{ inputs.directory }}/dists/stable/main
