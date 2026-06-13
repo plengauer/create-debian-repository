@@ -13,7 +13,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      actions: read
     steps:
       - uses: plengauer/opentelemetry-github/actions/instrument/job@af83be0ddf1ec3035230c030f3ab6d10a7040515 # v5.56.0
         env:
@@ -38,7 +37,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      actions: read
     steps:
       - uses: plengauer/opentelemetry-github/actions/instrument/job@edc52fb91829fdeee2e8a04b745d8f4fee33157d
         env:
