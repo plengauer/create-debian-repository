@@ -24,9 +24,11 @@ runs:
       run: |
         cat <<< "${{ inputs.source }}" | tr ',' '\n' | tr ';' '\n' | tr ' ' '\n' | xargs -I '{}' gh api /repos/'{}'/releases --paginate | jq '.[] | .assets[] | select(.name | endswith(".deb")) | .url' -r | xargs -r wget --header "Authorization: Bearer $GH_TOKEN" --header 'Accept: application/octet-stream' --tries inf --random-wait -nc 2> /dev/null
     - shell: bash
+      env:
+        MAX_SIZE: ${{ inputs.max_size }}
       working-directory: ${{ inputs.directory }}/pool/main
       run: |
-        ls | sort -nr | xargs -r stat -c '%s %n' | awk '(total += $1) > ${{ inputs.max_size }} { print $2 }' | xargs -r rm
+        ls | sort -nr | xargs -r stat -c '%s %n' | awk -v max_size="$MAX_SIZE" '(total += $1) > max_size { print $2 }' | xargs -r rm
     - shell: bash
       working-directory: ${{ inputs.directory }}/pool/main
       run: |
